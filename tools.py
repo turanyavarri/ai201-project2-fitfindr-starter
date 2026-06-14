@@ -194,5 +194,30 @@ def create_fit_card(outfit: str, new_item: dict) -> str:
 
     Before writing code, fill in the Tool 3 section of planning.md.
     """
-    # Replace this with your implementation
-    return ""
+    if not outfit or not outfit.strip():
+        return "Could not generate a fit card — outfit description was missing."
+
+    client = _get_groq_client()  
+
+    prompt = f"""You are writing an Instagram caption for a thrift outfit post. Keep it casual, fun, and authentic — like a real person posting their OOTD, not a brand.
+
+The thrifted item:
+- Name: {new_item['title']}
+- Price: ${new_item['price']}
+- Platform: {new_item['platform']}
+
+The outfit: {outfit}
+
+Write a 2-3 sentence caption that:
+- Mentions the item, price, and platform naturally (once each)
+- Captures the vibe of the outfit in specific terms
+- Sounds like something a real person would actually post
+- Uses casual language, maybe an emoji or two"""
+
+    response = client.chat.completions.create(
+        model="llama-3.3-70b-versatile",
+        messages=[{"role": "user", "content": prompt}],
+        max_tokens=150,
+        temperature=1.2,
+    )
+    return response.choices[0].message.content
